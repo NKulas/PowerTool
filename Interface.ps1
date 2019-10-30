@@ -2,134 +2,172 @@
 #Description: The main user interface for the Power Tool utility
 #Created by: Noah Kulas
 #Created date: Apr. 2, 2019
-#Last updated: Sep. 28, 2019
+#Last updated: Oct. 27, 2019
 
-#Declare variables
-    $DnsFlag = $false
-    $PingFlag = $false
+$global:Target = ""
 
-function Logo {
-Write-Output "     ------------ "
-             "    |            \ "
-             "    |              --- "
-             "    |            / "
-             "    |   --------- "
-             "    |  | "
-             "    |  | "
-             "    ---- "
+#Declare functions
+function GoButton_Click {
+    foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}
+    $StatusLabel.Text = "Please wait"
 
-Write-Output "POWER TOOL`n"
-}
+    $PlainName = $NameTextbox.Text
+    $Domain = Get-Content -Path "Configuration\DomainName.txt"
 
-function Main {
-    param ([bool]$Refresh = $false)
-
-    if (-not($Refresh)) {
-        Write-Output "`n>>Enter the target computer:"
-        Write-Host "> " -NoNewline
-        $PlainName = Read-Host
-        $Domain = Get-Content -Path "Configuration\DomainName.txt"
-
-        if (-not($PlainName -like "*$Domain")) {
-            $Target = $PlainName + ".$Domain"
-        }
-        else {
-            $Target = $PlainName
-        }
+    if (-not($PlainName -like "*$Domain")) {
+        $global:Target = $PlainName + ".$Domain"
     }
-    
+    else {
+        $global:Target = $PlainName
+    }
+
+    $NameTextbox.Text = $global:Target
+    $Status = ""
+
     #Check for it in nslookup
-    $Junk1, $Junk2, $Junk3, $LongName, $Junk4, $Junk5 = nslookup $Target
+    $Junk1, $Junk2, $Junk3, $LongName, $Junk4, $Junk5 = nslookup $global:Target
     if ($LongName -like "Name:*") {
         $DnsFlag = $true
+        $Status += "Found in dns, "
     }
     else {
         $DnsFlag = $false
+        $Status += "Not found in dns, "
     }
 
     #Try pinging it
-    if (Test-Connection -ComputerName $Target -Count 2 -TimeToLive 8 -Quiet) {
+    if (Test-Connection -ComputerName $global:Target -Count 2 -TimeToLive 8 -Quiet) {
         $PingFlag = $true
+        $Status += "currently on"
+        foreach ($Button in $AllActionButtons) {$Button.Enabled = $true}
     }
     else {
-        $PingFlag = $false
+        $Status += "currently off"
     }
-    TopLevel
+
+    $StatusLabel.Text = $Status
 }
 
-function TopLevel {
-    $TopLevelFlag = $false
-    while (-not($TopLevelFlag)) {
-        Write-Output "`n=============================="
-        Write-Output "Computer: $Target"
-        Write-Output "------------------------------"
-        if ($DnsFlag) {Write-Host "Found in dns, " -nonewline} else {Write-Host "Not found in dns, " -nonewline}
-        if ($PingFlag) {Write-Host "currently on" -nonewline} else {Write-Host "currently off" -nonewline}
-        Write-Output "`n=============================="
-        Write-Output ">>Options: 1)Actions 2)Who are you 3)Refresh 4)Change computer"
-        Write-Host "> " -NoNewline
-        $Option = Read-Host
-
-        Switch ($Option) {
-            1 {<#$TopLevelFlag = $true;#> Actions}
-            2 {<#$TopLevelFlag = $true;#> WhoAreYou}
-            3 {$TopLevelFlag = $true; Main -Refresh $true}
-            4 {$TopLevelFlag = $true; Main}
-            default {Write-Output ">>Unrecognized command"}
-        }
-    }
+function RestartButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\Restart.ps1", "-Target $global:Target"
 }
 
-function Actions {
-    $ActionsFlag = $false
-    while (-not($ActionsFlag)) {
-        Write-Output "`n------------------------------"
-        Write-Output "Actions for: $Target"
-        Write-Output "------------------------------"
-        Write-Output ">>Options: 1)Restart 2)Shutdown 3)Logoff 4)Rename 5)Back"
-        Write-Host "> " -NoNewline
-        $ActionOption = Read-Host
-
-        switch ($ActionOption) {
-            1 {powershell.exe -File "Modules\Restart.ps1" -Target $Target}
-            2 {powershell.exe -File "Modules\Shutdown.ps1" -Target $Target}
-            3 {powershell.exe -File "Modules\Logoff.ps1" -Target $Target}
-            4 {powershell.exe -File "Modules\Rename.ps1" -Target $Target}
-            5 {$ActionsFlag = $true}
-            default {Write-Output ">>Unrecognized command"}
-        }
-    }
+function ShutdownButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\Shutdown.ps1", "-Target $global:Target"
 }
 
-function WhoAreYou {
-    if ($PingFlag) {
-        Write-Output "`n------------------------------"
-        Write-Output "Info for: $Target"
-        Write-Output "------------------------------"
-
-        #Get the ip address from nslookup
-        $Junk1, $Junk2, $Junk3, $Junk4, $LongAddress, $Junk5 = nslookup $Target
-        $Junk6, $MidAddress = $LongAddress -split "  "
-        $Address = $MidAddress.Trim(" ")
-        
-        #Get the mac address from getmac
-        $Junk7, $Junk8, $Junk9, $LongMac = getmac /s $Target 
-        $Mac, $Junk10 = $LongMac -split "   "
-        
-        Write-Output ("Serial number: " + (Get-WmiObject -ComputerName $Target -Class "Win32_Bios").SerialNumber)
-        Write-Output ("Manufacturer: " + (Get-WmiObject -ComputerName $Target -Class "Win32_ComputerSystem").Manufacturer)
-        Write-Output ("Model: " + (Get-WmiObject -ComputerName $Target -Class "Win32_ComputerSystem").Model)
-        Write-Output ("Current user: " + (Get-WmiObject -ComputerName $Target -Class "Win32_ComputerSystem").UserName)
-        Write-Output ("Last boot: " + (Get-WmiObject -ComputerName $Target -Class "Win32_OperatingSystem").LastBootUpTime)
-        Write-Output ("Install date: " + (Get-WmiObject -ComputerName $Target -Class "Win32_OperatingSystem").InstallDate)
-        Write-Output ("Logical processors: " + (Get-WmiObject -ComputerName $Target -Class "Win32_ComputerSystem").NumberOfLogicalProcessors)
-        Write-Output ("Total memory: " + ((Get-WmiObject -ComputerName $Target -Class "Win32_ComputerSystem").TotalPhysicalMemory)/1000000000)
-        Write-Output ("Ip address: " + $Address)
-        Write-Output ("Mac address: " + $Mac)
-    }
-    else {
-        Write-Output "No data could be retrieved because the computer is not on"
-    }
+function LogoffButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\Logoff.ps1", "-Target $global:Target"
 }
-Logo
-Main
+
+function MessageButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\Message.ps1", "-Target $global:Target"
+}
+
+function RenameButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\Rename.ps1", "-Target $global:Target"
+}
+
+function InfoButton_Click {
+   Start-Process powershell.exe -ArgumentList "-File Modules\Info.ps1", "-Target $global:Target" 
+}
+
+#Declare variables 
+#$DnsFlag = $false
+#$PingFlag = $false
+
+#Create the form
+Add-Type -AssemblyName System.Windows.Forms
+#[System.Windows.Forms.Application]::EnableVisualStyles()
+
+$MainForm = New-Object System.Windows.Forms.Form
+$MainForm.ClientSize = '465,170'
+$MainForm.text = "Power Tool"
+$MainForm.TopMost = $false
+
+$NameLabel = New-Object System.Windows.Forms.Label
+$NameLabel.text = "Enter computer name:"
+$NameLabel.AutoSize = $true
+$NameLabel.width = 25
+$NameLabel.height = 10
+$NameLabel.location = New-Object System.Drawing.Point(15,20)
+$NameLabel.font = 'Microsoft Sans Serif,10'
+
+$NameTextbox = New-Object System.Windows.Forms.TextBox
+$NameTextbox.multiline = $false
+$NameTextbox.width = 157
+$NameTextbox.height = 20
+$NameTextbox.location = New-Object System.Drawing.Point(161,20)
+$NameTextbox.font = 'Microsoft Sans Serif,10'
+
+$GoButton = New-Object System.Windows.Forms.Button
+$GoButton.text = "Go"
+$GoButton.width = 60
+$GoButton.height = 30
+$GoButton.location = New-Object System.Drawing.Point(343,15)
+$GoButton.font = 'Microsoft Sans Serif,10'
+$GoButton.Add_Click({ GoButton_Click })
+
+$StatusLabel = New-Object System.Windows.Forms.Label
+$StatusLabel.text = ""
+$StatusLabel.AutoSize = $true
+$StatusLabel.width = 25
+$StatusLabel.height = 10
+$StatusLabel.location = New-Object System.Drawing.Point(15,55)
+$StatusLabel.font = 'Microsoft Sans Serif,10'
+
+$RestartButton = New-Object System.Windows.Forms.Button
+$RestartButton.text = "Restart"
+$RestartButton.width = 60
+$RestartButton.height = 30
+$RestartButton.location = New-Object System.Drawing.Point(16,90)
+$RestartButton.font = 'Microsoft Sans Serif,10'
+$RestartButton.Add_Click({ RestartButton_Click })
+
+$ShutdownButton = New-Object System.Windows.Forms.Button
+$ShutdownButton.text = "Shutdown"
+$ShutdownButton.width = 75
+$ShutdownButton.height = 30
+$ShutdownButton.location = New-Object System.Drawing.Point(85,90)
+$ShutdownButton.font = 'Microsoft Sans Serif,10'
+$ShutdownButton.Add_Click({ ShutdownButton_Click })
+
+$LogoffButton = New-Object System.Windows.Forms.Button
+$LogoffButton.text = "Logoff"
+$LogoffButton.width = 60
+$LogoffButton.height = 30
+$LogoffButton.location = New-Object System.Drawing.Point(170,90)
+$LogoffButton.font = 'Microsoft Sans Serif,10'
+$LogoffButton.Add_Click({ LogoffButton_Click })
+
+$MessageButton = New-Object System.Windows.Forms.Button
+$MessageButton.text = "Send message"
+$MessageButton.width = 113
+$MessageButton.height = 30
+$MessageButton.location = New-Object System.Drawing.Point(247,90)
+$MessageButton.font = 'Microsoft Sans Serif,10'
+$MessageButton.Add_Click({ MessageButton_Click })
+
+$RenameButton = New-Object System.Windows.Forms.Button
+$RenameButton.text = "Rename"
+$RenameButton.width = 65
+$RenameButton.height = 30
+$RenameButton.location = New-Object System.Drawing.Point(378,90)
+$RenameButton.font = 'Microsoft Sans Serif,10'
+$RenameButton.Add_Click({ RenameButton_Click })
+
+$InfoButton = New-Object System.Windows.Forms.Button
+$InfoButton.text = "Who are you"
+$InfoButton.width = 100
+$InfoButton.height = 30
+$InfoButton.location = New-Object System.Drawing.Point(15, 130)
+$InfoButton.font = 'Microsoft Sans Serif,10'
+$InfoButton.Add_Click({ InfoButton_Click })
+
+$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton)
+$AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton)
+
+foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}
+
+$MainForm.controls.AddRange($AllControls)
+$MainForm.ShowDialog()

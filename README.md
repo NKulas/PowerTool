@@ -16,5 +16,6 @@ I began this project in my free time at work to teach myself Powershell. I have 
 <h2>Cautions</h2>
 <ul>
 <li>I have only tested this with computers in a Windows Active Directory domain. I do not know what the results of using it on a computer that is not part of a domain would be.</li>
+<li>Powershell's execution policy may prevent the script from being run. To fix this, use "Set-ExecutionPolicy" to set it to "Unrestricted" or "Bypass".</li>
 <li>If you get an error about permission denied, you will have to follow usage option 2, but open the Powershell prompt with the "Run as Administrator" option.</li>
 </ul>
