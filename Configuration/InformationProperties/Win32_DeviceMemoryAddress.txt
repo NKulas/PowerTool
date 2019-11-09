@@ -1,0 +1,11 @@
+Caption,
+CreationClassName,
+CSCreationClassName,
+CSName,
+Description,
+EndingAddress,
+InstallDate,
+MemoryType,
+Name,
+StartingAddress,
+Status

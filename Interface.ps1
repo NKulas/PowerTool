@@ -2,7 +2,7 @@
 #Description: The main user interface for the Power Tool utility
 #Created by: Noah Kulas
 #Created date: Apr. 2, 2019
-#Last updated: Oct. 27, 2019
+#Last updated: Nov. 9, 2019
 
 $global:Target = ""
 
@@ -69,16 +69,12 @@ function RenameButton_Click {
 }
 
 function InfoButton_Click {
-   Start-Process powershell.exe -ArgumentList "-File Modules\Info.ps1", "-Target $global:Target" 
+    #$StatusLabel.Text = ((Convert-Path .) + "\Modules")
+    Start-Process powershell.exe -ArgumentList "-File Modules\Info.ps1", "-Target $global:Target" #-WorkingDirectory ((Convert-Path .) + "\Modules")
 }
-
-#Declare variables 
-#$DnsFlag = $false
-#$PingFlag = $false
 
 #Create the form
 Add-Type -AssemblyName System.Windows.Forms
-#[System.Windows.Forms.Application]::EnableVisualStyles()
 
 $MainForm = New-Object System.Windows.Forms.Form
 $MainForm.ClientSize = '465,170'
