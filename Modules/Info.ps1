@@ -2,11 +2,10 @@
 #Description: Gets information about the given remote computer
 #Created by: Noah Kulas
 #Created date: Apr. 2, 2019
-#Last updated: Nov. 9, 2019
 
 param([string]$Target)
 
-#This function helps with the fact that open this script in a new instance of Powershell with start process does not change the working directory
+#This function helps with the fact that opening this script in a new instance of Powershell with start process does not change the working directory
 #It allows the script to be developed and tested in the correct directory, and also launched from the interface without the correct directory
 function PathAdjust {
     param([string] $Path)
@@ -20,7 +19,6 @@ function PathAdjust {
     else {
         throw "No valid paths can be found"
     }
-
 }
 
 try {
@@ -95,6 +93,7 @@ try {
                         Write-Output "=>No devices could be found for this category"
                     }
                     $FoundMatch = $true
+                    Remove-CimSession -CimSession $Session
                     Write-Host "`n" -NoNewLine
                     break
                 }
@@ -115,5 +114,6 @@ try {
     return "Success"
 }
 catch {
+    Remove-CimSession -CimSession $Session
     return "Failure"
 }

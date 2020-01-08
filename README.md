@@ -2,7 +2,7 @@
 <h2>Description</h2>
 This utility allows for performing various actions on a remote computer in a Windows Active Directory domain environment. The "Interface" file is the main entry point. It will call additional modules in the "Modules" folder to perform each action.
 <h2>Background</h2>
-I began this project in my free time at work to teach myself Powershell. I have a lot of cool modules, and am working on removing information specific to my workplace in order to make them usable on any domain.
+I began this project in my free time at work to teach myself Powershell. I have a lot of cool modules, and am working on removing information specific to my workplace in order to make them usable on any domain. The created date in most files is when I created the original version at work.
 <h2>Installation</h2>
 <ol>
 <li>Download the files and put them in a directory of your choice</li>

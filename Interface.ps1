@@ -69,8 +69,11 @@ function RenameButton_Click {
 }
 
 function InfoButton_Click {
-    #$StatusLabel.Text = ((Convert-Path .) + "\Modules")
-    Start-Process powershell.exe -ArgumentList "-File Modules\Info.ps1", "-Target $global:Target" #-WorkingDirectory ((Convert-Path .) + "\Modules")
+    Start-Process powershell.exe -ArgumentList "-File Modules\Info.ps1", "-Target $global:Target"
+}
+
+function LockButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\Lock.ps1", "-Target $global:Target"
 }
 
 #Create the form
@@ -160,8 +163,16 @@ $InfoButton.location = New-Object System.Drawing.Point(15, 130)
 $InfoButton.font = 'Microsoft Sans Serif,10'
 $InfoButton.Add_Click({ InfoButton_Click })
 
-$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton)
-$AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton)
+$LockButton = New-Object System.Windows.Forms.Button
+$LockButton.text = "Lock"
+$LockButton.width = 50
+$LockButton.height = 30
+$LockButton.location = New-Object System.Drawing.Point(125, 130)
+$LockButton.font = 'Microsoft Sans Serif,10'
+$LockButton.Add_Click({ LockButton_Click })
+
+$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton)
+$AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton)
 
 foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}
 

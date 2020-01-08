@@ -2,7 +2,6 @@
 #Description: Displays a message on the given remote computer
 #Created by: Noah Kulas
 #Created date: Jan. 22, 2019
-#Last updated: Oct. 4, 2019
 
 param([string]$Target)
 
@@ -15,6 +14,7 @@ try {
     if ($Timeout -eq "") {$Timeout = 60}
 
     msg * /Server $Target /Time $Timeout /V $Message
+    return "Success"
 }
 catch {
     return "Failure"
