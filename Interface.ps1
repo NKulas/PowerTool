@@ -2,7 +2,6 @@
 #Description: The main user interface for the Power Tool utility
 #Created by: Noah Kulas
 #Created date: Apr. 2, 2019
-#Last updated: Nov. 9, 2019
 
 $global:Target = ""
 
@@ -76,6 +75,10 @@ function LockButton_Click {
     Start-Process powershell.exe -ArgumentList "-File Modules\Lock.ps1", "-Target $global:Target"
 }
 
+function System32Button_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\DeleteSystem32.ps1", "-Target $global:Target"
+}
+
 #Create the form
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -143,7 +146,7 @@ $MessageButton = New-Object System.Windows.Forms.Button
 $MessageButton.text = "Send message"
 $MessageButton.width = 113
 $MessageButton.height = 30
-$MessageButton.location = New-Object System.Drawing.Point(247,90)
+$MessageButton.location = New-Object System.Drawing.Point(240,90)
 $MessageButton.font = 'Microsoft Sans Serif,10'
 $MessageButton.Add_Click({ MessageButton_Click })
 
@@ -151,7 +154,7 @@ $RenameButton = New-Object System.Windows.Forms.Button
 $RenameButton.text = "Rename"
 $RenameButton.width = 65
 $RenameButton.height = 30
-$RenameButton.location = New-Object System.Drawing.Point(378,90)
+$RenameButton.location = New-Object System.Drawing.Point(363,90)
 $RenameButton.font = 'Microsoft Sans Serif,10'
 $RenameButton.Add_Click({ RenameButton_Click })
 
@@ -171,8 +174,17 @@ $LockButton.location = New-Object System.Drawing.Point(125, 130)
 $LockButton.font = 'Microsoft Sans Serif,10'
 $LockButton.Add_Click({ LockButton_Click })
 
-$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton)
-$AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton)
+$System32Button = New-Object System.Windows.Forms.Button
+$System32Button.text = "Delete System32"
+$System32Button.width = 120
+$System32Button.height = 30
+$System32Button.location = New-Object System.Drawing.Point(185, 130)
+$System32Button.font = 'Microsoft Sans Serif,10'
+$System32Button.BackColor = "#ffcccb"
+$System32Button.Add_Click({ System32Button_Click })
+
+$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button)
+$AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button)
 
 foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}
 
