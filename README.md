@@ -25,4 +25,19 @@ Features I plan to add in the future include:
 <li>This was only designed for use in a domain environment.</li>
 <li>Powershell's execution policy may prevent the script from being run. To fix this, use "Set-ExecutionPolicy" to set it to "Unrestricted" or "Bypass".</li>
 <li>This is intended for use by people with higher privelages than a standard user. Some features require that your domain account has local administrator privelages on the target computer.</li>
+<li>Do not misuse this tool.</li>
+</ul>
+
+<h2>Modules</h2>
+<ul>
+<li>Restart - restart the specified computer</li>
+<li>Shutdown - shutdown the specified computer</li>
+<li>Logoff - logoff the current user on the specified computer</li>
+<li>Send message - display a message on the specified computer</li>
+<li>Rename - rename the specified computer</li>
+<li>Lock - locks the specified computer</li>
+<li>Delete System32 - this will actually files in the system32 folder on the specified computer! It was meant primarily as a proof of concept for the spearfish module. Be careful with this.</li>
+<li>Who are you - opens a new powershell window to view data about the specified computer</li>
+<li>Start network scan - opens a new powershell window that creates a list of hosts and mac addressed on the network. It currently only works on the same subnet as the current computer, but will eventually be made cross-subnet.</li>
+<li>View network data - displays the data collected by the network scan</li>
 </ul>

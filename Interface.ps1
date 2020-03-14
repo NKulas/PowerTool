@@ -79,11 +79,19 @@ function System32Button_Click {
     Start-Process powershell.exe -ArgumentList "-File Modules\DeleteSystem32.ps1", "-Target $global:Target"
 }
 
+function NetworkScanButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\NetworkScanner.ps1"
+}
+
+function ViewNetworkDataButton_Click {
+    Start-Process powershell.exe -ArgumentList "-Command `"Write-Output (Get-Content -Path `Dataset\Network.txt`)`"; Read-Host;"
+}
+
 #Create the form
 Add-Type -AssemblyName System.Windows.Forms
 
 $MainForm = New-Object System.Windows.Forms.Form
-$MainForm.ClientSize = '465,170'
+$MainForm.ClientSize = '465,215'
 $MainForm.text = "Power Tool"
 $MainForm.TopMost = $false
 
@@ -183,7 +191,23 @@ $System32Button.font = 'Microsoft Sans Serif,10'
 $System32Button.BackColor = "#ffcccb"
 $System32Button.Add_Click({ System32Button_Click })
 
-$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button)
+$NetworkScanButton = New-Object System.Windows.Forms.Button
+$NetworkScanButton.text = "Start network scan"
+$NetworkScanButton.width = 130
+$NetworkScanButton.height = 30
+$NetworkScanButton.location = New-Object System.Drawing.Point(15, 170)
+$NetworkScanButton.font = 'Microsoft Sans Serif,10'
+$NetworkScanButton.Add_Click({ NetworkScanButton_Click })
+
+$ViewNetworkDataButton = New-Object System.Windows.Forms.Button
+$ViewNetworkDataButton.text = "View network data"
+$ViewNetworkDataButton.width = 130
+$ViewNetworkDataButton.height = 30
+$ViewNetworkDataButton.location = New-Object System.Drawing.Point(155, 170)
+$ViewNetworkDataButton.font = 'Microsoft Sans Serif,10'
+$ViewNetworkDataButton.Add_Click({ ViewNetworkDataButton_Click })
+
+$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button,$NetworkScanButton,$ViewNetworkDataButton)
 $AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button)
 
 foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}
