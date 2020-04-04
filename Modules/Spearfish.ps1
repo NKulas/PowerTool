@@ -3,7 +3,7 @@
 #Created by: Noah Kulas
 #Created date: Nov. 1, 2019
 
-param([string]$Target, [string]$Action, [string]$Arguments = "", [bool]$AsSystem = $false)
+param([string]$Target, [string]$Action, [string]$Arguments = "", [switch]$AsSystem)
 
 try {
     $Session = New-CimSession -ComputerName $Target
@@ -19,10 +19,10 @@ try {
         $A = New-ScheduledTaskAction -Execute $Action
     }
 
-    $T = New-ScheduledTaskTrigger -At (Get-Date).AddSeconds(2) -Once
+    $T = New-ScheduledTaskTrigger -At (Get-Date).AddSeconds(8) -Once
 
     if ($AsSystem) {
-        $P = New-ScheduledTaskPrincipal -Id "NT AUTHORITY\SYSTEM" -RunLevel Highest
+        $P = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -RunLevel Highest
     }
     else {
         $P = New-ScheduledTaskPrincipal -GroupId "Users" -RunLevel Highest
@@ -32,7 +32,7 @@ try {
     $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
     Register-ScheduledTask -TaskName $Name -InputObject $D -CimSession $Session
 
-    Start-Sleep -Seconds 3
+    Start-Sleep -Seconds 11
 
     Unregister-ScheduledTask -TaskName $Name -CimSession $Session -Confirm:$false
     Remove-CimSession -CimSession $Session

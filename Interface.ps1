@@ -84,7 +84,7 @@ function NetworkScanButton_Click {
 }
 
 function ViewNetworkDataButton_Click {
-    Start-Process powershell.exe -ArgumentList "-Command `"Write-Output (Get-Content -Path `Dataset\Network.txt`)`"; Read-Host;"
+    Start-Process powershell.exe -ArgumentList "-File ViewNetworkData.ps1"
 }
 
 #Create the form
@@ -213,4 +213,5 @@ $AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButto
 foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}
 
 $MainForm.controls.AddRange($AllControls)
+$MainForm.AcceptButton = $GoButton
 $MainForm.ShowDialog()

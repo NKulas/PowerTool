@@ -4,22 +4,37 @@
 #Created date: Feb. 1, 2020
 
 #Modes:
-#0: Get current network data
-#1: Make data queries from the file - Not available yet
+#0: Get data from this computer's network
+#1: Make data queries from the file
 
-#Output formats: -Only start and end available
-#0: Subnet name
-#1: Subnet abbreviations
-#2: Network address
-#3: Broadcast address
-#4: Subnet mask
-#5: First address
-#6: Last address
+#Output formats:
+#1: Subnet name -only available in mode 1
+#2: Subnet abbreviation -only availalbe in mode 1
+#3: Network address -not yet available
+#4: Broadcast address -not yet available
+#5: Subnet mask -not yet available
+#6: First address
+#7: Last address
 
 #Input data currently must be the subnet abbreviation
 param([int]$Mode, [string]$InputData, [int]$OutputFormat)
 
 #Define functions
+#This allows the path to be different in testing and launch from interface
+function PathAdjust {
+    param ([string] $Path)
+
+    if (Test-Path $Path) {
+        return $Path
+    }
+    elseif (Test-Path -Path $Path.Replace("..\","")) {
+        return $Path.Replace("..\","")
+    }
+    else {
+        return $Path
+    }
+}
+
 function ConvertDecimalToBinary {
     param([int]$DecimalNumber)
 
@@ -46,6 +61,7 @@ function ConvertBinaryToDeciaml {
     return $DecimalNumber
 }
 
+#Start body
 if ($Mode -eq 0) {
     $Data = Get-WmiObject -Class win32_NetworkAdapterConfiguration
     
@@ -75,7 +91,7 @@ if ($Mode -eq 0) {
                     $DecimalResult += ($BinaryAddressOctet[$k] * [Math]::Pow(2, 7 - $k))
                 }
                 else {
-                    if ($OutputFormat -eq 6) {
+                    if ($OutputFormat -eq 7) {
                         $DecimalResult += (1 * [Math]::Pow(2, 7 - $k))
                     }
                 }
@@ -91,6 +107,26 @@ if ($Mode -eq 0) {
     }
 }
 
+if ($Mode -eq 1) {
+    $DataFile = Get-Content -Path (PathAdjust -Path "..\Configuration\NetworkLayout.txt")
+
+    foreach ($Row in $DataFile) {
+        $RowItemized = $Row.Split(";")
+
+        if ($RowItemized -contains $InputData) {
+        
+            switch ($OutputFormat) {
+                1 { return $RowItemized[1].Trim() } #Subnet name
+                2 { return $RowItemized[0].Trim() } #Subnet abbreviation
+                #3 {} #Network address
+                #4 {} #Broadcast address
+                #5 {} #Subnet mask
+                6 { return $RowItemized[2].Trim() } #First address
+                7 { return $RowItemized[3].Trim() } #Last address
+            }
+        }
+    }
+}
 
 
 <#function IsNetMask {
@@ -118,44 +154,4 @@ if ($Mode -eq 0) {
     else {
         throw
     }
-}#>
-
-
-#try {
-    <#$Content = Get-Content -Path "..\Configuration\NetworkLayout.txt" -Raw
-    foreach ($Line in $Content.Split("`n")) {
-
-        if (-not($Line[0] -eq "#")) {
-            $LineParts = $Line.Split(";")
-            $FullName = $LineParts[0]
-            $ShortName = $LineParts[1]
-            $StartAddress = $LineParts[2]
-            $EndAddress = $LineParts[3]
-
-            if ($ShortName -eq $InputData) {
-                switch ($OutputFormat) {
-                    0 {return $FullName}
-                    1 {return $ShortName}
-                    #2 {return $NetworkAddress}
-                    #3 {return $BroadcastAddress}
-                    #4 {return $NetMask}
-                    5 {return $FirstAddress}
-                    6 {return $LastAddress}
-                }
-            }
-
-            if (IsNetMask $LineParts[3]) {
-                $NetworkAddress = $LineParts[2]
-                $NetMask = $LineParts[3]
-            }
-            else {
-                $StartAddress = $LineParts[2]
-                $EndAddress = $LineParts[3]
-            }
-        }
-    }#>
-
-<#}
-catch {
-
 }#>
