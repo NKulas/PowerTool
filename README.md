@@ -7,8 +7,6 @@ This utility allows for performing various actions on a remote computer in a Win
 I began this project in my free time at work to teach myself Powershell. I am now working on creating a new version of my original tool that will work with any domain. I will also be continuing to add new features.
 Features I plan to add in the future include:
 <ul>
-<li>Mapping and data analysis of all computers on the network</li>
-<li>Wake on lan</li>
 <li>Block users from certain computers</li>
 </ul>
 
@@ -36,14 +34,15 @@ Features I plan to add in the future include:
 
 <h2>Modules</h2>
 <ul>
-<li>Restart - restart the specified computer</li>
-<li>Shutdown - shutdown the specified computer</li>
-<li>Logoff - logoff the current user on the specified computer</li>
-<li>Send message - display a message on the specified computer</li>
-<li>Rename - rename the specified computer</li>
+<li>Restart - restarts the specified computer</li>
+<li>Shutdown - shuts down the specified computer</li>
+<li>Logoff - logs off the current user on the specified computer</li>
+<li>Send message - displays a message on the specified computer</li>
+<li>Rename - renames the specified computer</li>
 <li>Lock - locks the specified computer</li>
 <li>Delete System32 - this will actually files in the system32 folder on the specified computer! It was meant primarily as a proof of concept for the spearfish module. Be careful with this.</li>
 <li>Who are you - opens a new powershell window to view data about the specified computer</li>
+<li>Wake on lan - sends a wake on lan magic packet to the specified computer
 <li>Start network scan - opens a new powershell window that creates a list of hosts and mac addressed on the specified subnet.</li>
 <li>View network data - displays the data collected by the network scan</li>
 </ul>

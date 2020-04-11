@@ -79,6 +79,10 @@ function System32Button_Click {
     Start-Process powershell.exe -ArgumentList "-File Modules\DeleteSystem32.ps1", "-Target $global:Target"
 }
 
+function WakeOnLanButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File Modules\WakeOnLan.ps1", "-Target $global:Target"
+}
+
 function NetworkScanButton_Click {
     Start-Process powershell.exe -ArgumentList "-File Modules\NetworkScanner.ps1"
 }
@@ -191,6 +195,14 @@ $System32Button.font = 'Microsoft Sans Serif,10'
 $System32Button.BackColor = "#ffcccb"
 $System32Button.Add_Click({ System32Button_Click })
 
+$WakeOnLanButton = New-Object System.Windows.Forms.Button
+$WakeOnLanButton.text = "Wake on lan"
+$WakeOnLanButton.width = 100
+$WakeOnLanButton.height = 30
+$WakeOnLanButton.location = New-Object System.Drawing.Point(315, 130)
+$WakeOnLanButton.font = 'Microsoft Sans Serif,10'
+$WakeOnLanButton.Add_Click({ WakeOnLanButton_Click })
+
 $NetworkScanButton = New-Object System.Windows.Forms.Button
 $NetworkScanButton.text = "Start network scan"
 $NetworkScanButton.width = 130
@@ -207,7 +219,7 @@ $ViewNetworkDataButton.location = New-Object System.Drawing.Point(155, 170)
 $ViewNetworkDataButton.font = 'Microsoft Sans Serif,10'
 $ViewNetworkDataButton.Add_Click({ ViewNetworkDataButton_Click })
 
-$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button,$NetworkScanButton,$ViewNetworkDataButton)
+$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button,$WakeOnLanButton,$NetworkScanButton,$ViewNetworkDataButton)
 $AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button)
 
 foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}

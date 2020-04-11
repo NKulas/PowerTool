@@ -19,7 +19,7 @@ try {
         $A = New-ScheduledTaskAction -Execute $Action
     }
 
-    $T = New-ScheduledTaskTrigger -At (Get-Date).AddSeconds(8) -Once
+    #$T = New-ScheduledTaskTrigger -At (Get-Date).AddSeconds(8) -Once
 
     if ($AsSystem) {
         $P = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -RunLevel Highest
@@ -29,12 +29,33 @@ try {
     }
 
     $S = New-ScheduledTaskSettingsSet -DisallowHardTerminate -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Compatibility V1
-    $D = New-ScheduledTask -Action $A -Principal $P -Trigger $T -Settings $S
+    $D = New-ScheduledTask -Action $A -Principal $P <#-Trigger $T#> -Settings $S
     Register-ScheduledTask -TaskName $Name -InputObject $D -CimSession $Session
 
-    Start-Sleep -Seconds 11
+    $TaskLoop = $true
+    $Counter = 0
+    while ($TaskLoop) {
+        $Task = Get-ScheduledTaskInfo -TaskName $Name -CimSession $Session -ErrorAction SilentlyContinue
 
-    Unregister-ScheduledTask -TaskName $Name -CimSession $Session -Confirm:$false
+        if ($Task -ne $null) {
+            if ($Task.LastTaskResult -ne 0) {
+                Start-ScheduledTask -TaskName $Name -CimSession $Session
+            }
+            else {
+                Unregister-ScheduledTask -TaskName $Name -CimSession $Session -Confirm:$false
+            }
+        }
+
+        if ($Counter -ge 9) {
+            $TaskLoop = $false
+        }
+        else {
+            $Counter++
+            Start-Sleep -Seconds 1
+        }
+    }
+
+    #Unregister-ScheduledTask -TaskName $Name -CimSession $Session -Confirm:$false
     Remove-CimSession -CimSession $Session
     return "Success"
 }

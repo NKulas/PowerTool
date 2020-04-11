@@ -1,8 +1,8 @@
 (10.1.0.1) : A1-B2-C3-D4-E5-F6
-DESK-100-1 : 06-64-B5-AE-B2-7D
-DESK-100-2 : 06-64-B5-2E-51-F4
-LAP-100-3 : 1D-30-BC-89-78-25
-DESK-105-1 : 06-64-B5-9F-3C-EA
-DESK-207-1 : 06-64-B5-90-42-05
-LAP-207-2 : 1D-30-BC-2E-CF-D6
-LAP-215-1 : 1D-30-BC-85-2E-68
+DESK-100-1.example.com : 06-64-B5-AE-B2-7D
+DESK-100-2.example.com : ~
+LAP-100-3.example.com : 1D-30-BC-89-78-25
+DESK-105-1.example.com : 06-64-B5-9F-3C-EA
+DESK-207-1.example.com : ~
+LAP-207-2.example.com : ~
+LAP-215-1.example.com : 1D-30-BC-85-2E-68
