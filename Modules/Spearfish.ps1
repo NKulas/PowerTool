@@ -7,11 +7,9 @@ param([string]$Target, [string]$Action, [string]$Arguments = "", [switch]$AsSyst
 
 try {
     $Session = New-CimSession -ComputerName $Target
-    $Minute = (Get-Date).Minute.ToString()
-    $Second = (Get-Date).Second.ToString()
-    $Millisecond = (Get-Date).Millisecond.ToString()
-    $Name = "Spearfish" + $Minute + $Second + $Millisecond
+    $TaskName = (New-Guid).Guid
 
+    #Action
     if ($Arguments -ne "") {
         $A = New-ScheduledTaskAction -Execute $Action -Argument $Arguments
     }
@@ -19,8 +17,7 @@ try {
         $A = New-ScheduledTaskAction -Execute $Action
     }
 
-    #$T = New-ScheduledTaskTrigger -At (Get-Date).AddSeconds(8) -Once
-
+    #Security principal
     if ($AsSystem) {
         $P = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -RunLevel Highest
     }
@@ -28,21 +25,26 @@ try {
         $P = New-ScheduledTaskPrincipal -GroupId "Users" -RunLevel Highest
     }
 
+    #Settings
     $S = New-ScheduledTaskSettingsSet -DisallowHardTerminate -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -Compatibility V1
-    $D = New-ScheduledTask -Action $A -Principal $P <#-Trigger $T#> -Settings $S
-    Register-ScheduledTask -TaskName $Name -InputObject $D -CimSession $Session
+
+    #Create task
+    $D = New-ScheduledTask -Action $A -Principal $P -Settings $S
+    Register-ScheduledTask -TaskName $TaskName -InputObject $D -CimSession $Session
 
     $TaskLoop = $true
     $Counter = 0
     while ($TaskLoop) {
-        $Task = Get-ScheduledTaskInfo -TaskName $Name -CimSession $Session -ErrorAction SilentlyContinue
+        $Task = Get-ScheduledTaskInfo -TaskName $TaskName -CimSession $Session -ErrorAction SilentlyContinue
 
         if ($Task -ne $null) {
             if ($Task.LastTaskResult -ne 0) {
-                Start-ScheduledTask -TaskName $Name -CimSession $Session
+                Start-ScheduledTask -TaskName $TaskName -CimSession $Session
             }
             else {
-                Unregister-ScheduledTask -TaskName $Name -CimSession $Session -Confirm:$false
+                Unregister-ScheduledTask -TaskName $TaskName -CimSession $Session -Confirm:$false
+                $TaskLoop = $false
+                break
             }
         }
 
@@ -55,7 +57,6 @@ try {
         }
     }
 
-    #Unregister-ScheduledTask -TaskName $Name -CimSession $Session -Confirm:$false
     Remove-CimSession -CimSession $Session
     return "Success"
 }

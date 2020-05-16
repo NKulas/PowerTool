@@ -26,7 +26,31 @@ function PathAdjust {
 
 function IsIpAddress {
     param ([string]$StringInQuestion)
-    return $StringInQuestion -match "^[0-255]\.[0-255]\.[0-255]\.[0-255]$"
+    
+    if ($StringInQuestion -match "\.") {
+        $ItemizedString = $StringInQuestion.Split(".")
+
+        if ($ItemizedString.Count -eq 4) {
+            foreach ($PossibleOctet in $ItemizedString) {
+                [Int]$Number = $null
+                if ([Int]::TryParse($PossibleOctet, [ref]$Number)) {
+                    if (-not(($Number -ge 0) -and ($Number -le 255))) {
+                        return $false
+                    }
+                }
+                else {
+                    return $false
+                }
+            }
+            return $true
+        }
+        else {
+            return $false
+        }
+    }
+    else {
+        return $false
+    }
 }
 
 function GetNextAddress {
@@ -91,14 +115,8 @@ function FindProxy {
 Write-Host "Enter subnet abbreviation: " -NoNewline
 $SubnetAbbreviation = Read-Host
 
-$StartAddress = & (PathAdjust -Path ".\NetworkDataInterpreter.ps1") -Mode 1 -InputData $SubnetAbbreviation -OutputFormat 6
-$EndAddress = & (PathAdjust -Path ".\NetworkDataInterpreter.ps1") -Mode 1 -InputData $SubnetAbbreviation -OutputFormat 7
-
-if (Test-Path -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt")) {
-    Remove-Item -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt")
-}
-
-New-Item -Path (PathAdjust -Path "..\Dataset") -Name "$SubnetAbbreviation.txt" -ItemType File
+$StartAddress = & (PathAdjust -Path ".\NetworkDataInterpreter.ps1") -InputFormat 2 -InputData $SubnetAbbreviation -OutputFormat 6
+$EndAddress = & (PathAdjust -Path ".\NetworkDataInterpreter.ps1") -InputFormat 2 -InputData $SubnetAbbreviation -OutputFormat 7
 
 $ThisComputer = [System.Net.Dns]::Resolve($ENV:COMPUTERNAME).AddressList
 $Primary = FindProxy -StartingPoint $StartAddress
@@ -109,38 +127,44 @@ $CurrentAddress = $StartAddress
 while (-not($CurrentAddress -eq $EndAddress)) {
     #Skip this computer's address
     if ($ThisComputer -contains $CurrentAddres) {
-        $CurrentAddress = GetNextAddress -Address $CurrentAddress
+        $CurrentAddress = GetNextAddress -LastAddress $CurrentAddress
     }
 
-    $HasName, $PingFlag, $MacFlag = $false, $false, $false
-    $Result = ""
+    $NameFlag, $PingFlag, $MacFlag = $false, $false, $false
+    $Mac = ""
 
-    $Name = [System.Net.Dns]::Resolve($CurrentAddress).HostName
-    $HasName = -not(IsIpAddress -StringInQuestion $Name)
+    $Identity = [System.Net.Dns]::Resolve($CurrentAddress).HostName
+    if (-not(IsIpAddress -StringInQuestion $Identity)) {
+        $NameFlag = $true
+    }
 
-    $PingFlag = Test-Connection -ComputerName $CurrentAddress -Count 2 -TimeToLive 8 -Quiet
-        
+    if (Test-Connection -ComputerName $CurrentAddress -TimeToLive 8 -Quiet) {
+        $PingFlag = $true
+    }
+
     if ($PingFlag) {
-        if (-not($CurrentAddress -eq $Primary)) {
-            $Proxy = $Primary
-        }
-        else {
+        if ($CurrentAddress -eq $PrimaryIp) {
             $Proxy = $Secondary
         }
+        else {
+            $Proxy = $Primary
+        }
 
-        .\Spearfish.ps1 -Target $Proxy -Action "cmd.exe" -Arguments "/C ping $CurrentAddress"
-        .\Spearfish.ps1 -Target $Proxy -Action "cmd.exe" -Arguments "/C arp -a > C:\arp.txt"
+        #Get the mac
+        .\Spearfish.ps1 -Target $Proxy -Action "cmd.exe" -Arguments "/C ping $CurrentAddress" -AsSystem
+        .\Spearfish.ps1 -Target $Proxy -Action "cmd.exe" -Arguments "/C arp -a > C:\arp.txt" -AsSystem
 
         $ArpFile = Get-Content -Path ("\\" + $Proxy + "\c$\arp.txt")
         Remove-Item -Path ("\\" + $Proxy + "\c$\arp.txt")
 
         foreach ($Line in $ArpFile) {
             $Line = $Line.TrimStart()
+
             if ($NUMBERS -contains $Line[0]) {
                 $NormalizedLine = ""
 
                 $NoMoreSpace = $false
-                for ($i = 0; $i -lt $Line.Length; $i++) {
+                for ($i = 0; $i -lt $Line.length; $i++) {
                     $Character = $Line[$i]
 
                     if ($Character -eq " ") {
@@ -148,12 +172,12 @@ while (-not($CurrentAddress -eq $EndAddress)) {
                             $NormalizedLine += $Character
                             $NoMoreSpace = $true
                         }
-                    }
+                    } #End if ($Character -eq " ")
                     else {
                         $NormalizedLine += $Character
                         $NoMoreSpace = $false
                     }
-                } #End for ($i = 0; $i -lt $Line.Length; $i++)
+                } #End for ($i = 0; $i -lt $Line.length; $i++)
                     
                 $Ip, $Mac, $Type = $NormalizedLine.Split(" ")
 
@@ -161,25 +185,68 @@ while (-not($CurrentAddress -eq $EndAddress)) {
                     $MacFlag = $true
                     break
                 }
-            } #End if ($NUMBERS -contains Line[0])
+            } #End if ($NUMBERS -contains $Line[0])
         } #End foreach ($Line in $ArpFile)
+    } #End if ($PingFlag)
 
-        if ($HasName) {
-            $Result = "$Name : "
-        }
-        else {
-            $Result = "($Name) : "
-        }
+    if ($NameFlag -or $PingFlag) {
+        $FileEntry = "$Identity : "
 
         if ($MacFlag) {
-            $Result += $Mac.ToUpper()
+            $FileEntry += $Mac
         }
         else {
-            $Result += "~"
+            $FileEntry += "~"
         }
 
-        Add-Content -Value $Result -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt")
-    } #End if ($PingFlag)
+        if (-not(Test-Path -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt"))) {
+            New-Item -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt") -ItemType "File"
+        }
+
+        $Files = Get-ChildItem -Path (PathAdjust -Path "..\Dataset")
+        $CurrentSubnetFile = $false
+
+        foreach ($File in $Files) {
+            if ($File.Name.Replace(".txt","") -eq $SubnetAbbreviation) {
+                $CurrentSubnetFile = $true
+            }
+            else {
+                $CurrentSubnetFile = $false
+            }
+
+            $NameFound = $false
+            $Content = Get-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name))
+
+            foreach ($Line in $Content) {
+                $RecordName, $RecordMac = $Line.Split(":")
+                $RecordName = $RecordName.Trim()
+                $RecordMac = $RecordMac.Trim()
+
+                if ($RecordName -eq $Identity) {
+                    if ($CurrentSubnetFile) {
+                        if ($MacFlag -and ($RecordMac -ne $Mac)) {
+                            #Recorded mac does not match what was found in the scan, so replace the entry
+                            Set-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name)) -Value ($Content -replace $Line, $FileEntry)
+                        }
+                        $NameFound = $true
+                    } #End if ($CurrentSubnetFile)
+                    else {
+                        #Computer is recorded in a different subnet file than the scan found, so remove the entry
+                        Set-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name)) -Value (Select-String -InputObject $Content -NotMatch $Line)
+                    }
+                } #End if ($RecordName -eq $Identity)
+                elseif ($RecordMac -eq $Mac) {
+                    #The mac was found associated with a different computer name, so remove the mac from the entry
+                    Set-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name)) -Value ($Content -replace $Line, "$RecordName : ~")
+                } #End elseif ($RecordMac -eq $Mac)
+            } #End foreach ($Line in $Content) {
+
+            if ($CurrentSubnetFile -and (-not($NameFound))) {
+                #The computer is not recorded in the subnet file, so add an entry
+                Add-Content -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt") -Value $FileEntry
+            }
+        } #End foreach ($File in $Files)
+    } #End if ($NameFlag -or $PingFlag)
 
     $CurrentAddress = GetNextAddress -LastAddress $CurrentAddress
 }

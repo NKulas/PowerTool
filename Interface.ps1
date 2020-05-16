@@ -11,7 +11,7 @@ function GoButton_Click {
     $StatusLabel.Text = "Please wait"
 
     $PlainName = $NameTextbox.Text
-    $Domain = Get-Content -Path "Configuration\DomainName.txt"
+    $Domain = Get-Content -Path ".\Configuration\DomainName.txt"
 
     if (-not($PlainName -like "*$Domain")) {
         $global:Target = $PlainName + ".$Domain"
@@ -48,47 +48,47 @@ function GoButton_Click {
 }
 
 function RestartButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\Restart.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\Restart.ps1", "-Target $global:Target"
 }
 
 function ShutdownButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\Shutdown.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\Shutdown.ps1", "-Target $global:Target"
 }
 
 function LogoffButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\Logoff.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\Logoff.ps1", "-Target $global:Target"
 }
 
 function MessageButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\Message.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\Message.ps1", "-Target $global:Target"
 }
 
 function RenameButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\Rename.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\Rename.ps1", "-Target $global:Target"
 }
 
 function InfoButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\Info.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\Info.ps1", "-Target $global:Target"
 }
 
 function LockButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\Lock.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\Lock.ps1", "-Target $global:Target"
 }
 
 function System32Button_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\DeleteSystem32.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\DeleteSystem32.ps1", "-Target $global:Target"
 }
 
 function WakeOnLanButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\WakeOnLan.ps1", "-Target $global:Target"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\WakeOnLan.ps1", "-Target $global:Target"
 }
 
 function NetworkScanButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File Modules\NetworkScanner.ps1"
+    Start-Process powershell.exe -ArgumentList "-File .\Modules\NetworkScanner.ps1"
 }
 
 function ViewNetworkDataButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ViewNetworkData.ps1"
+    Start-Process powershell.exe -ArgumentList "-File .\ViewNetworkData.ps1"
 }
 
 #Create the form
