@@ -5,24 +5,8 @@
 
 param([string]$Target)
 
-#This function helps with the fact that opening this script in a new instance of Powershell with start process does not change the working directory
-#It allows the script to be developed and tested in the correct directory, and also launched from the interface without the correct directory
-function PathAdjust {
-    param([string] $Path)
-
-    if (Test-Path -Path $Path) {
-        return $path
-    }
-    elseif (Test-Path $Path.Replace("..\","")) {
-        return $Path.Replace("..\","")
-    }
-    else {
-        throw "No valid paths can be found"
-    }
-}
-
 try {
-    $Categories = Get-ChildItem -Path (PathAdjust -Path "..\Configuration\InformationProperties")
+    $Categories = Get-ChildItem -Path "..\Configuration\InformationProperties"
     $CommonNames = @()
 
     $MainLoop = $true
@@ -73,7 +57,7 @@ try {
                 Write-Host "`n" -NoNewline
             } #End if ($Choice -eq 1)
             elseif ($Choice -lt $i) {
-                $Properties = Get-Content -Path (PathAdjust -Path ("..\Configuration\InformationProperties\" + $Categories[$Choice - 2].Name))
+                $Properties = Get-Content -Path ("..\Configuration\InformationProperties\" + $Categories[$Choice - 2].Name)
 
                 $Session = New-CimSession -ComputerName $Target
                 $CimInstance = (Get-CimInstance -Class ("Win32_" + $CommonNames[$Choice - 2]) -CimSession $Session)
@@ -108,9 +92,10 @@ try {
             Write-Output "`n=>Unrecognized command`n"
         }
     } #End while ($MainLoop)
-    return "Success"
+
+    return $true
 }
 catch {
     Remove-CimSession -CimSession $Session
-    return "Failure"
+    return $false
 }

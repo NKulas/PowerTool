@@ -24,8 +24,8 @@ try {
     $Client.Send($ByteArray, $ByteArray.Length)
     $Client.Close()
 
-    return "Success"
+    return $true
 }
 catch {
-    return "Failure"
+    return $false
 }

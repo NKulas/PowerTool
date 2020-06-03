@@ -5,36 +5,14 @@
 
 param([string]$Target)
 
-#Functions
-function PathAdjust {
-    param([string]$Path)
+. ".\ModularFunctions\IsIpAddress.ps1"
 
-    if (Test-Path -Path $Path) {
-        return $Path
-    }
-    elseif (Test-Path -Path $Path.Replace(".\", "Modules\")) {
-        return $Path.Replace(".\", "Modules\")
-    }
-    elseif (Test-Path -Path $Path.Replace("..\", "")) {
-        return $Path.Replace("..\","")
-    }
-    else {
-        return $Path
-    }
-}
-
-function IsIpAddress {
-    param ([string]$StringInQuestion)
-    return $StringInQuestion -match "^[0-255]\.[0-255]\.[0-255]\.[0-255]$"
-}
-
-#Body
 try {
     $TargetFound = $false
-    $SubnetFiles = Get-ChildItem -Path (PathAdjust -Path "..\Dataset")
+    $SubnetFiles = Get-ChildItem -Path "..\Dataset"
 
     :l1 foreach ($File in $SubnetFiles) {
-        $Content = Get-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name))
+        $Content = Get-Content -Path ("..\Dataset\" + $File.Name)
     
         :l2 foreach ($Line in $Content) {
             $CandidateName, $CandidateMac = $Line.Split(" : ")
@@ -64,18 +42,20 @@ try {
                         #The spearfish module has problems using an ip address as the proxy
                         $Proxy = ([System.Net.Dns]::Resolve($TargetName).HostName)
                     
-                        Copy-Item -Path (PathAdjust -Path ".\WolDetachable.ps1") -Destination "\\$Proxy\c$"
-                        #.\Spearfish.ps1 -Target $Proxy -Action "Powershell.exe" -Arguments "-File `"C:\WolDetachable.ps1`" -Mac `"$CandidateMac`" -Broadcast `"255.255.255.255`" -AsSystem"
+                        Copy-Item -Path "..\Detachables\WolDetachable.ps1" -Destination "\\$Proxy\c$"
+                        .\Spearfish.ps1 -Target $Proxy -Action "Powershell.exe" -Arguments "-File `"C:\WolDetachable.ps1`" -Mac `"$CandidateMac`" -Broadcast `"255.255.255.255`"" -AsSystem
                         Remove-Item -Path "\\$Proxy\c$\WolDetachable.ps1"
+
+                        return $true
                     }
                 }
             }
         }
     }
     else {
-        return "Not found"
+        return $false
     }
 }
 catch {
-    return "Failure"
+    return $false
 }

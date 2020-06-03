@@ -7,8 +7,9 @@ param([string]$Target)
 
 try {
     shutdown -r -f -t 0 -m $Target
-    return "Success"
+
+    return $true
 }
 catch {
-    return "Failure"
+    return $false
 }

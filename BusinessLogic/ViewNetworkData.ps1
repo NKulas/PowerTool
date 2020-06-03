@@ -6,8 +6,8 @@
 Write-Host "Enter subnet abbreviation: " -NoNewline
 $Subnet = Read-Host
 
-if (Test-Path -Path "Dataset\$Subnet.txt") {
-    $Content = Get-Content -Path "Dataset\$Subnet.txt"
+if (Test-Path -Path "..\Dataset\$Subnet.txt") {
+    $Content = Get-Content -Path "..\Dataset\$Subnet.txt"
     Write-Output $Content
 }
 else {

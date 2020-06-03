@@ -7,8 +7,8 @@ param([string]$Target)
 
 try {
     logoff console /Server $Target
-    return "Success"
+    return $true
 }
 catch {
-    return "Failure"
+    return $false
 }

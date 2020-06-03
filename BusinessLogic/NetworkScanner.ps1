@@ -3,56 +3,11 @@
 #Created by: Noah Kulas
 #Created date: Jan. 22, 2020
 
+. ".\ModularFunctions\IsIpAddress.ps1"
+
 Set-Variable -Name "NUMBERS" -Value "0","1","2","3","4","5","6","7","8","9" -Option Constant
 
 #Functions
-#Allows path to be different in testing and launch from interface
-function PathAdjust {
-    param([string] $Path)
-
-    if (Test-Path -Path $Path) {
-        return $Path
-    }
-    elseif (Test-Path $Path.Replace(".\","Modules\")) {
-        return $Path.Replace(".\","Modules\")
-    }
-    elseif (Test-Path $Path.Replace("..\","")) {
-        return $Path.Replace("..\","")
-    }
-    else {
-        return $Path
-    }
-}
-
-function IsIpAddress {
-    param ([string]$StringInQuestion)
-    
-    if ($StringInQuestion -match "\.") {
-        $ItemizedString = $StringInQuestion.Split(".")
-
-        if ($ItemizedString.Count -eq 4) {
-            foreach ($PossibleOctet in $ItemizedString) {
-                [Int]$Number = $null
-                if ([Int]::TryParse($PossibleOctet, [ref]$Number)) {
-                    if (-not(($Number -ge 0) -and ($Number -le 255))) {
-                        return $false
-                    }
-                }
-                else {
-                    return $false
-                }
-            }
-            return $true
-        }
-        else {
-            return $false
-        }
-    }
-    else {
-        return $false
-    }
-}
-
 function GetNextAddress {
     param([string]$LastAddress)
 
@@ -115,8 +70,8 @@ function FindProxy {
 Write-Host "Enter subnet abbreviation: " -NoNewline
 $SubnetAbbreviation = Read-Host
 
-$StartAddress = & (PathAdjust -Path ".\NetworkDataInterpreter.ps1") -InputFormat 2 -InputData $SubnetAbbreviation -OutputFormat 6
-$EndAddress = & (PathAdjust -Path ".\NetworkDataInterpreter.ps1") -InputFormat 2 -InputData $SubnetAbbreviation -OutputFormat 7
+$StartAddress = & ".\NetworkDataInterpreter.ps1" -InputFormat 2 -InputData $SubnetAbbreviation -OutputFormat 6
+$EndAddress = & ".\NetworkDataInterpreter.ps1" -InputFormat 2 -InputData $SubnetAbbreviation -OutputFormat 7
 
 $ThisComputer = [System.Net.Dns]::Resolve($ENV:COMPUTERNAME).AddressList
 $Primary = FindProxy -StartingPoint $StartAddress
@@ -199,11 +154,11 @@ while (-not($CurrentAddress -eq $EndAddress)) {
             $FileEntry += "~"
         }
 
-        if (-not(Test-Path -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt"))) {
-            New-Item -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt") -ItemType "File"
+        if (-not(Test-Path -Path "..\Dataset\$SubnetAbbreviation.txt")) {
+            New-Item -Path "..\Dataset\$SubnetAbbreviation.txt" -ItemType "File"
         }
 
-        $Files = Get-ChildItem -Path (PathAdjust -Path "..\Dataset")
+        $Files = Get-ChildItem -Path "..\Dataset"
         $CurrentSubnetFile = $false
 
         foreach ($File in $Files) {
@@ -215,7 +170,7 @@ while (-not($CurrentAddress -eq $EndAddress)) {
             }
 
             $NameFound = $false
-            $Content = Get-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name))
+            $Content = Get-Content -Path ("..\Dataset\" + $File.Name)
 
             foreach ($Line in $Content) {
                 $RecordName, $RecordMac = $Line.Split(":")
@@ -226,24 +181,24 @@ while (-not($CurrentAddress -eq $EndAddress)) {
                     if ($CurrentSubnetFile) {
                         if ($MacFlag -and ($RecordMac -ne $Mac)) {
                             #Recorded mac does not match what was found in the scan, so replace the entry
-                            Set-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name)) -Value ($Content -replace $Line, $FileEntry)
+                            Set-Content -Path ("..\Dataset\" + $File.Name) -Value ($Content -replace $Line, $FileEntry)
                         }
                         $NameFound = $true
                     } #End if ($CurrentSubnetFile)
                     else {
                         #Computer is recorded in a different subnet file than the scan found, so remove the entry
-                        Set-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name)) -Value (Select-String -InputObject $Content -NotMatch $Line)
+                        Set-Content -Path ("..\Dataset\" + $File.Name) -Value (Select-String -InputObject $Content -NotMatch $Line)
                     }
                 } #End if ($RecordName -eq $Identity)
                 elseif ($RecordMac -eq $Mac) {
                     #The mac was found associated with a different computer name, so remove the mac from the entry
-                    Set-Content -Path (PathAdjust -Path ("..\Dataset\" + $File.Name)) -Value ($Content -replace $Line, "$RecordName : ~")
+                    Set-Content -Path ("..\Dataset\" + $File.Name) -Value ($Content -replace $Line, "$RecordName : ~")
                 } #End elseif ($RecordMac -eq $Mac)
             } #End foreach ($Line in $Content) {
 
             if ($CurrentSubnetFile -and (-not($NameFound))) {
                 #The computer is not recorded in the subnet file, so add an entry
-                Add-Content -Path (PathAdjust -Path "..\Dataset\$SubnetAbbreviation.txt") -Value $FileEntry
+                Add-Content -Path "..\Dataset\$SubnetAbbreviation.txt" -Value $FileEntry
             }
         } #End foreach ($File in $Files)
     } #End if ($NameFlag -or $PingFlag)

@@ -23,21 +23,6 @@
 
 param(<#[int]$Mode,#> [int]$InputFormat, [string]$InputData, [int]$OutputFormat)
 
-#This allows the path to be different in testing and launch from interface
-function PathAdjust {
-    param ([string] $Path)
-
-    if (Test-Path $Path) {
-        return $Path
-    }
-    elseif (Test-Path -Path $Path.Replace("..\","")) {
-        return $Path.Replace("..\","")
-    }
-    else {
-        return $Path
-    }
-}
-
 function ConvertDecimalToBinary {
     param([int]$DecimalNumber, [int]$Bits = 8)
 
@@ -209,7 +194,7 @@ function BroadcastAddress {
 }#>
 
 <#if ($Mode -eq 1) {#>
-    $DataFile = Get-Content -Path (PathAdjust -Path "..\Configuration\NetworkLayout.txt")
+    $DataFile = Get-Content -Path "..\Configuration\NetworkLayout.txt"
 
     foreach ($Row in $DataFile) {
         if ($Row -notlike "#*" -and $Row -notlike "") {

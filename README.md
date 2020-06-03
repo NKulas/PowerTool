@@ -1,10 +1,10 @@
 # PowerTool
 
 <h2>Description</h2>
-This utility allows for performing various actions on a remote computer in a Windows Active Directory domain environment. The "Interface" file is the main entry point. It will call additional modules in the "Modules" folder to perform each action.
+This utility allows for performing various actions on a remote computer in a Windows Active Directory domain environment.
 
 <h2>Background</h2>
-I began this project in my free time at work to teach myself Powershell. I am now working on creating a new version of my original tool that will work with any domain. I will also be continuing to add new features.
+I created my original PowerTool as a way to teach myself PowerShell. I am now redesigning it to work on any domain, as well as continuing to add new features.
 Features I plan to add in the future include:
 <ul>
 <li>Block users from certain computers</li>
@@ -18,31 +18,14 @@ Features I plan to add in the future include:
 </ol>
 
 <h2>Use</h2>
-<b>Important note:</b> This is intended for use by people with higher privelages than a standard user. Some features require that your domain account has local administrator privelages on the target computer.
-<ul>
-<li>Option 1: Open the directory in file explorer, right click on the "Interface.ps1" file, and select run with Powershell</li>
-<li>Option 2: Open the Powershell prompt, enter "cd" followed by the path to the directory the files are in, enter ".\Interface.ps1"</li>
+<li>Option 1: Open the directory in file explorer, right click on the "Main.ps1" file, and select run with Powershell</li>
+<li>Option 2: Open the Powershell prompt, enter "cd" followed by the path to the directory the files are in, enter ".\Main.ps1"</li>
 </ul>
 
 <h2>Cautions</h2>
 <ul>
 <li>This was only designed for use in a domain environment.</li>
 <li>Powershell's execution policy may prevent the script from being run. To fix this, use "Set-ExecutionPolicy" to set it to "Unrestricted" or "Bypass".</li>
-<li>This is intended for use by people with higher privelages than a standard user. Some features require that your domain account has local administrator privelages on the target computer.</li>
+<li>This is intended for use by people with higher privileges than a standard user. Some features require that your domain account has local administrator privileges on the target computer.</li>
 <li>Do not misuse this tool.</li>
-</ul>
-
-<h2>Modules</h2>
-<ul>
-<li>Restart - restarts the specified computer</li>
-<li>Shutdown - shuts down the specified computer</li>
-<li>Logoff - logs off the current user on the specified computer</li>
-<li>Send message - displays a message on the specified computer</li>
-<li>Rename - renames the specified computer</li>
-<li>Lock - locks the specified computer</li>
-<li>Delete System32 - this will actually files in the system32 folder on the specified computer! It was meant primarily as a proof of concept for the spearfish module. Be careful with this.</li>
-<li>Who are you - opens a new powershell window to view data about the specified computer</li>
-<li>Wake on lan - sends a wake on lan magic packet to the specified computer
-<li>Start network scan - opens a new powershell window that creates a list of hosts and mac addressed on the specified subnet.</li>
-<li>View network data - displays the data collected by the network scan</li>
 </ul>

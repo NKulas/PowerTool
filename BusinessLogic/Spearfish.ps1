@@ -58,9 +58,9 @@ try {
     }
 
     Remove-CimSession -CimSession $Session
-    return "Success"
+    return $true
 }
 catch {
     Remove-CimSession -CimSession $Session
-    return "Failure"
+    return $false
 }

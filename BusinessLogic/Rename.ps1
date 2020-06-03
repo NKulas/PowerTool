@@ -9,8 +9,9 @@ try {
     Write-Output "Enter new name: "
     $NewName = Read-Host
     Rename-Computer -ComputerName $Target -NewName $NewName -DomainCredential "$env:UserDomain\$env:UserName" -Restart
-    return "Success"
+
+    return $true
 }
 catch{
-    return "Failure"
+    return $false
 }
