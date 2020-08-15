@@ -6,7 +6,8 @@
 param([string]$Target)
 
 try {
-    logoff console /Server $Target
+    shutdown -l -f -t 0 -m $Target
+
     return $true
 }
 catch {

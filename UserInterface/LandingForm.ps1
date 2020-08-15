@@ -47,52 +47,21 @@ function GoButton_Click {
     $StatusLabel.Text = $Status
 }
 
-function RestartButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Restart.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function ShutdownButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Shutdown.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function LogoffButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Logoff.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function MessageButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Message.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function RenameButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Rename.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function InfoButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Info.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function LockButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Lock.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function System32Button_Click {
-    .\DeleteSystem32Form.ps1 -Target $global:Target
-}
-
-function WakeOnLanButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\WakeOnLan.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
-}
-
-function NetworkScanButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\NetworkScanner.ps1" -WorkingDirectory "..\BusinessLogic"
-}
-
-function ViewNetworkDataButton_Click {
-    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\ViewNetworkData.ps1" -WorkingDirectory "..\BusinessLogic"
-}
-
-#Create the form
 Add-Type -AssemblyName System.Windows.Forms
+
+#Create fixed controls
+function GenerateButton {
+    param([string]$Text, [EventHandler]$Action, [ref]$AddToList)
+
+    $Button = New-Object System.Windows.Forms.Button
+    $Button.Name = ($Text + "Button")
+    $Button.Text = $Text
+    $Button.AutoSize = $true
+    $Button.Font = "Microsoft Sans Serif, 10"
+
+    $Button.Add_Click($Action)
+    $AddToList.Value += $Button
+}
 
 $MainForm = New-Object System.Windows.Forms.Form
 $MainForm.ClientSize = '465,215'
@@ -105,21 +74,21 @@ $NameLabel.AutoSize = $true
 $NameLabel.width = 25
 $NameLabel.height = 10
 $NameLabel.location = New-Object System.Drawing.Point(15,20)
-$NameLabel.font = 'Microsoft Sans Serif,10'
+$NameLabel.font = "Microsoft Sans Serif, 10"
 
 $NameTextbox = New-Object System.Windows.Forms.TextBox
 $NameTextbox.multiline = $false
 $NameTextbox.width = 157
 $NameTextbox.height = 20
 $NameTextbox.location = New-Object System.Drawing.Point(161,20)
-$NameTextbox.font = 'Microsoft Sans Serif,10'
+$NameTextbox.font = "Microsoft Sans Serif, 10"
 
 $GoButton = New-Object System.Windows.Forms.Button
 $GoButton.text = "Go"
 $GoButton.width = 60
 $GoButton.height = 30
 $GoButton.location = New-Object System.Drawing.Point(343,15)
-$GoButton.font = 'Microsoft Sans Serif,10'
+$GoButton.font = "Microsoft Sans Serif, 10"
 $GoButton.Add_Click({ GoButton_Click })
 
 $StatusLabel = New-Object System.Windows.Forms.Label
@@ -128,102 +97,95 @@ $StatusLabel.AutoSize = $true
 $StatusLabel.width = 25
 $StatusLabel.height = 10
 $StatusLabel.location = New-Object System.Drawing.Point(15,55)
-$StatusLabel.font = 'Microsoft Sans Serif,10'
+$StatusLabel.font = "Microsoft Sans Serif, 10"
 
-$RestartButton = New-Object System.Windows.Forms.Button
-$RestartButton.text = "Restart"
-$RestartButton.width = 60
-$RestartButton.height = 30
-$RestartButton.location = New-Object System.Drawing.Point(16,90)
-$RestartButton.font = 'Microsoft Sans Serif,10'
-$RestartButton.Add_Click({ RestartButton_Click })
+$FixedControls = @($NameLabel, $NameTextbox, $GoButton, $StatusLabel)
 
-$ShutdownButton = New-Object System.Windows.Forms.Button
-$ShutdownButton.text = "Shutdown"
-$ShutdownButton.width = 75
-$ShutdownButton.height = 30
-$ShutdownButton.location = New-Object System.Drawing.Point(85,90)
-$ShutdownButton.font = 'Microsoft Sans Serif,10'
-$ShutdownButton.Add_Click({ ShutdownButton_Click })
+#Create dynamic controls
+$LayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+$LayoutPanel.Width = 450
+$LayoutPanel.Height = 100
+$LayoutPanel.Location = New-Object System.Drawing.Point(8, 85)
+$LayoutPanel.AutoScroll = $true
 
-$LogoffButton = New-Object System.Windows.Forms.Button
-$LogoffButton.text = "Logoff"
-$LogoffButton.width = 60
-$LogoffButton.height = 30
-$LogoffButton.location = New-Object System.Drawing.Point(170,90)
-$LogoffButton.font = 'Microsoft Sans Serif,10'
-$LogoffButton.Add_Click({ LogoffButton_Click })
+$DynamicControls = @()
 
-$MessageButton = New-Object System.Windows.Forms.Button
-$MessageButton.text = "Send message"
-$MessageButton.width = 113
-$MessageButton.height = 30
-$MessageButton.location = New-Object System.Drawing.Point(240,90)
-$MessageButton.font = 'Microsoft Sans Serif,10'
-$MessageButton.Add_Click({ MessageButton_Click })
+#Restart
+function RestartButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Restart.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "Restart" -Action {RestartButton_Click} -AddToList ([ref]$DynamicControls)
 
-$RenameButton = New-Object System.Windows.Forms.Button
-$RenameButton.text = "Rename"
-$RenameButton.width = 65
-$RenameButton.height = 30
-$RenameButton.location = New-Object System.Drawing.Point(363,90)
-$RenameButton.font = 'Microsoft Sans Serif,10'
-$RenameButton.Add_Click({ RenameButton_Click })
+#Shutdown
+function ShutdownButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Shutdown.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "Shutdown" -Action {ShutdownButton_Click} -AddToList ([ref]$DynamicControls)
 
-$InfoButton = New-Object System.Windows.Forms.Button
-$InfoButton.text = "Who are you"
-$InfoButton.width = 100
-$InfoButton.height = 30
-$InfoButton.location = New-Object System.Drawing.Point(15, 130)
-$InfoButton.font = 'Microsoft Sans Serif,10'
-$InfoButton.Add_Click({ InfoButton_Click })
+#Logoff
+function LogoffButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Logoff.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "Logoff" -Action {LogoffButton_Click} -AddToList ([ref]$DynamicControls)
 
-$LockButton = New-Object System.Windows.Forms.Button
-$LockButton.text = "Lock"
-$LockButton.width = 50
-$LockButton.height = 30
-$LockButton.location = New-Object System.Drawing.Point(125, 130)
-$LockButton.font = 'Microsoft Sans Serif,10'
-$LockButton.Add_Click({ LockButton_Click })
+#Message
+function MessageButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Message.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "Message" -Action {MessageButton_Click} -AddToList ([ref]$DynamicControls)
 
-$System32Button = New-Object System.Windows.Forms.Button
-$System32Button.text = "Delete System32"
-$System32Button.width = 120
-$System32Button.height = 30
-$System32Button.location = New-Object System.Drawing.Point(185, 130)
-$System32Button.font = 'Microsoft Sans Serif,10'
-$System32Button.BackColor = "#ffcccb"
-$System32Button.Add_Click({ System32Button_Click })
+#Rename
+function RenameButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Rename.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "Rename" -Action {RenameButton_Click} -AddToList ([ref]$DynamicControls)
 
-$WakeOnLanButton = New-Object System.Windows.Forms.Button
-$WakeOnLanButton.text = "Wake on lan"
-$WakeOnLanButton.width = 100
-$WakeOnLanButton.height = 30
-$WakeOnLanButton.location = New-Object System.Drawing.Point(315, 130)
-$WakeOnLanButton.font = 'Microsoft Sans Serif,10'
-$WakeOnLanButton.Add_Click({ WakeOnLanButton_Click })
+#WhoAreYou
+function WhoAreYouButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Info.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "WhoAreYou" -Action {WhoAreYouButton_Click} -AddToList ([ref]$DynamicControls)
 
-$NetworkScanButton = New-Object System.Windows.Forms.Button
-$NetworkScanButton.text = "Start network scan"
-$NetworkScanButton.width = 130
-$NetworkScanButton.height = 30
-$NetworkScanButton.location = New-Object System.Drawing.Point(15, 170)
-$NetworkScanButton.font = 'Microsoft Sans Serif,10'
-$NetworkScanButton.Add_Click({ NetworkScanButton_Click })
+#Lock
+function LockButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\Lock.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "Lock" -Action {LockButton_Click} -AddToList ([ref]$DynamicControls)
 
-$ViewNetworkDataButton = New-Object System.Windows.Forms.Button
-$ViewNetworkDataButton.text = "View network data"
-$ViewNetworkDataButton.width = 130
-$ViewNetworkDataButton.height = 30
-$ViewNetworkDataButton.location = New-Object System.Drawing.Point(155, 170)
-$ViewNetworkDataButton.font = 'Microsoft Sans Serif,10'
-$ViewNetworkDataButton.Add_Click({ ViewNetworkDataButton_Click })
+#DeleteSystem32
+function DeleteSystem32Button_Click {
+    .\DeleteSystem32Form.ps1 -Target $global:Target
+}
+GenerateButton -Text "DeleteSystem32" -Action {DeleteSystem32Button_Click} -AddToList ([ref]$DynamicControls)
 
-$AllControls = @($NameLabel,$NameTextbox,$GoButton,$StatusLabel,$RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button,$WakeOnLanButton,$NetworkScanButton,$ViewNetworkDataButton)
-$AllActionButtons = @($RestartButton,$ShutdownButton,$LogoffButton,$MessageButton,$RenameButton,$InfoButton,$LockButton,$System32Button)
+#WakeOnLan
+function WakeOnLanButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\WakeOnLan.ps1", "-Target $global:Target" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "WakeOnLan" -Action {WakeOnLanButton_Click} -AddToList ([ref]$DynamicControls)
 
-foreach ($Button in $AllActionButtons) {$Button.Enabled = $false}
+#BlockUser
+function BlockUserButton_Click {
+    .\BlockUserForm.ps1 -Target $global:Target
+}
+GenerateButton -Text "BlockUser" -Action {BlockUserButton_Click} -AddToList ([ref]$DynamicControls)
 
-$MainForm.controls.AddRange($AllControls)
+#StartNetworkScan
+function StartNetworkScanButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\NetworkScanner.ps1" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "StartNetworkScan" -Action {StartNetworkScanButton_Click} -AddToList ([ref]$DynamicControls)
+
+#ViewNetworkData
+function ViewNetworkDataButton_Click {
+    Start-Process powershell.exe -ArgumentList "-File ..\BusinessLogic\ViewNetworkData.ps1" -WorkingDirectory "..\BusinessLogic"
+}
+GenerateButton -Text "ViewNetworkData" -Action {ViewNetworkDataButton_Click} -AddToList ([ref]$DynamicControls)
+
+$LayoutPanel.Controls.AddRange($DynamicControls)
+
+$MainForm.Controls.AddRange($FixedControls)
+$MainForm.Controls.Add($LayoutPanel)
+
 $MainForm.AcceptButton = $GoButton
 $MainForm.ShowDialog()

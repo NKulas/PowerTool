@@ -5,10 +5,6 @@ This utility allows for performing various actions on a remote computer in a Win
 
 <h2>Background</h2>
 I created my original PowerTool as a way to teach myself PowerShell. I am now redesigning it to work on any domain, as well as continuing to add new features.
-Features I plan to add in the future include:
-<ul>
-<li>Block users from certain computers</li>
-</ul>
 
 <h2>Installation</h2>
 <ol>
