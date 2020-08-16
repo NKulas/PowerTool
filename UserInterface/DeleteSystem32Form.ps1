@@ -35,7 +35,7 @@ try {
     $ConfirmForm = New-Object System.Windows.Forms.Form
     $ConfirmForm.ClientSize = '350, 150'
     $ConfirmForm.text = "Delete sytem32"
-    $ConfirmForm.TopMost = $false
+    $COnfirmForm.StartPosition = "CenterScreen"
 
     $WarningLabel = New-Object System.Windows.Forms.Label
     $WarningLabel.text = "WARNING! THIS WILL ACTUALLY DO IT!"

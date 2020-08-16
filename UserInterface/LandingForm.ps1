@@ -51,7 +51,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
 #Create fixed controls
 function GenerateButton {
-    param([string]$Text, [EventHandler]$Action, [ref]$AddToList)
+    param([string]$Text, [EventHandler]$Action, [ref]$AddToList, [switch]$Danger)
 
     $Button = New-Object System.Windows.Forms.Button
     $Button.Name = ($Text + "Button")
@@ -59,45 +59,49 @@ function GenerateButton {
     $Button.AutoSize = $true
     $Button.Font = "Microsoft Sans Serif, 10"
 
+    if ($Danger) {
+        $Button.BackColor = "0xFF5555"
+    }
+
     $Button.Add_Click($Action)
     $AddToList.Value += $Button
 }
 
 $MainForm = New-Object System.Windows.Forms.Form
 $MainForm.ClientSize = '465,215'
-$MainForm.text = "Power Tool"
-$MainForm.TopMost = $false
+$MainForm.Text = "Power Tool"
+$MainForm.StartPosition = "CenterScreen"
 
 $NameLabel = New-Object System.Windows.Forms.Label
-$NameLabel.text = "Enter computer name:"
+$NameLabel.Text = "Enter computer name:"
 $NameLabel.AutoSize = $true
-$NameLabel.width = 25
-$NameLabel.height = 10
-$NameLabel.location = New-Object System.Drawing.Point(15,20)
-$NameLabel.font = "Microsoft Sans Serif, 10"
+$NameLabel.Width = 25
+$NameLabel.Height = 10
+$NameLabel.Location = New-Object System.Drawing.Point(15,20)
+$NameLabel.Font = "Microsoft Sans Serif, 10"
 
 $NameTextbox = New-Object System.Windows.Forms.TextBox
-$NameTextbox.multiline = $false
-$NameTextbox.width = 157
-$NameTextbox.height = 20
-$NameTextbox.location = New-Object System.Drawing.Point(161,20)
-$NameTextbox.font = "Microsoft Sans Serif, 10"
+$NameTextbox.Multiline = $false
+$NameTextbox.Width = 157
+$NameTextbox.Height = 20
+$NameTextbox.Location = New-Object System.Drawing.Point(161,20)
+$NameTextbox.Font = "Microsoft Sans Serif, 10"
 
 $GoButton = New-Object System.Windows.Forms.Button
-$GoButton.text = "Go"
-$GoButton.width = 60
-$GoButton.height = 30
-$GoButton.location = New-Object System.Drawing.Point(343,15)
-$GoButton.font = "Microsoft Sans Serif, 10"
+$GoButton.Text = "Go"
+$GoButton.Width = 60
+$GoButton.Height = 30
+$GoButton.Location = New-Object System.Drawing.Point(343,15)
+$GoButton.Font = "Microsoft Sans Serif, 10"
 $GoButton.Add_Click({ GoButton_Click })
 
 $StatusLabel = New-Object System.Windows.Forms.Label
-$StatusLabel.text = ""
+$StatusLabel.Text = ""
 $StatusLabel.AutoSize = $true
-$StatusLabel.width = 25
-$StatusLabel.height = 10
-$StatusLabel.location = New-Object System.Drawing.Point(15,55)
-$StatusLabel.font = "Microsoft Sans Serif, 10"
+$StatusLabel.Width = 25
+$StatusLabel.Height = 10
+$StatusLabel.Location = New-Object System.Drawing.Point(15,55)
+$StatusLabel.Font = "Microsoft Sans Serif, 10"
 
 $FixedControls = @($NameLabel, $NameTextbox, $GoButton, $StatusLabel)
 
@@ -156,7 +160,7 @@ GenerateButton -Text "Lock" -Action {LockButton_Click} -AddToList ([ref]$Dynamic
 function DeleteSystem32Button_Click {
     .\DeleteSystem32Form.ps1 -Target $global:Target
 }
-GenerateButton -Text "DeleteSystem32" -Action {DeleteSystem32Button_Click} -AddToList ([ref]$DynamicControls)
+GenerateButton -Text "DeleteSystem32" -Action {DeleteSystem32Button_Click} -AddToList ([ref]$DynamicControls) -Danger
 
 #WakeOnLan
 function WakeOnLanButton_Click {
